@@ -56,7 +56,6 @@ def handle_dialog(req, res):
         'хорошо'
     ]:
         res['response']['text'] = 'Слона можно найти на Яндекс.Маркете!'
-        res['response']['end_session'] = True
         handle_dialog2(request.json, response)
         return
 
