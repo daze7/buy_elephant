@@ -25,6 +25,7 @@ def main():
     }
 
     handle_dialog(request.json, response)
+    handle_dialog2(request.json, response)
 
     logging.info(f'Response:  {response!r}')
 
@@ -56,7 +57,6 @@ def handle_dialog(req, res):
         'хорошо'
     ]:
         res['response']['text'] = 'Слона можно найти на Яндекс.Маркете!'
-        handle_dialog2(request.json, response)
         return
 
     res['response']['text'] = \
@@ -77,7 +77,7 @@ def handle_dialog2(req, res):
             ]
         }
         res['response']['text'] = 'Привет! Купи кролика!'
-        res['response']['buttons'] = get_suggests(user_id)
+        res['response']['buttons'] = get_suggests2(user_id)
         return
 
     if req['request']['original_utterance'].lower() in [
