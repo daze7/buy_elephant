@@ -10,6 +10,7 @@ app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
 
 sessionStorage = {}
+elephant_status = False
 
 
 @app.route('/post', methods=['POST'])
@@ -25,7 +26,6 @@ def main():
     }
 
     handle_dialog(request.json, response)
-    handle_dialog2(request.json, response)
 
     logging.info(f'Response:  {response!r}')
 
@@ -33,8 +33,12 @@ def main():
 
 
 def handle_dialog(req, res):
+    global elephant_status
     user_id = req['session']['user_id']
-
+    if elephant_status:
+        ani = 'кролика'
+    else:
+        ani = 'слона'
     if req['session']['new']:
 
         sessionStorage[user_id] = {
@@ -44,7 +48,7 @@ def handle_dialog(req, res):
                 "Отстань!",
             ]
         }
-        res['response']['text'] = 'Привет! Купи слона!'
+        res['response']['text'] = 'Привет! Купи ' + ani + '!'
         res['response']['buttons'] = get_suggests(user_id)
         return
 
@@ -56,67 +60,22 @@ def handle_dialog(req, res):
         'покупаю',
         'хорошо'
     ]:
-        res['response']['text'] = 'Слона можно найти на Яндекс.Маркете!'
+        res['response']['text'] = ani.capitalize() + ' можно найти на Яндекс.Маркете!'
+        elephant_status = True
         return
 
     res['response']['text'] = \
-        f"Все говорят '{req['request']['original_utterance']}', а ты купи слона!"
+        f"Все говорят '{req['request']['original_utterance']}', а ты купи "
+    res['response']['text'] += ani + '!'
     res['response']['buttons'] = get_suggests(user_id)
-    
-    
-def handle_dialog2(req, res):
-    user_id = req['session']['user_id']
 
-    if req['session']['new']:
-
-        sessionStorage[user_id] = {
-            'suggests': [
-                "Не хочу.",
-                "Не буду.",
-                "Отстань!",
-            ]
-        }
-        res['response']['text'] = 'Привет! Купи кролика!'
-        res['response']['buttons'] = get_suggests2(user_id)
-        return
-
-    if req['request']['original_utterance'].lower() in [
-        'Я покупаю',
-        'Я куплю',
-        'ладно',
-        'куплю',
-        'покупаю',
-        'хорошо'
-    ]:
-        res['response']['text'] = 'Кролика можно найти на Яндекс.Маркете!'
-        res['response']['end_session'] = True
-        return
-
-    res['response']['text'] = \
-        f"Все говорят '{req['request']['original_utterance']}', а ты купи кролика!"
-    res['response']['buttons'] = get_suggests2(user_id)
-    
-    
-def get_suggests2(user_id):
-    session = sessionStorage[user_id]
-
-    suggests = [
-        {'title': suggest, 'hide': True}
-        for suggest in session['suggests'][:2]
-    ]
-    session['suggests'] = session['suggests'][1:]
-    sessionStorage[user_id] = session
-
-    if len(suggests) < 2:
-        suggests.append({
-            "title": "Ладно",
-            "url": "https://market.yandex.ru/search?text=кролик",
-            "hide": True
-        })
-
-    return suggests
 
 def get_suggests(user_id):
+    global elephant_status
+    if elephant_status:
+        ani = 'кролика'
+    else:
+        ani = 'слона'
     session = sessionStorage[user_id]
 
     suggests = [
@@ -127,9 +86,10 @@ def get_suggests(user_id):
     sessionStorage[user_id] = session
 
     if len(suggests) < 2:
+        urll = 'https://market.yandex.ru/search?text=' + ani[:-1]
         suggests.append({
             "title": "Ладно",
-            "url": "https://market.yandex.ru/search?text=слон",
+            "url": urll,
             "hide": True
         })
 
